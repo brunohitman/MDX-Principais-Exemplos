@@ -196,33 +196,22 @@ FROM [CubeName]
 
 # Ordenação de Dados:
 
-## Top:
-O Top é usado para exibir os melhores resultados com base em uma medida específica. É útil quando você deseja mostrar os principais elementos com os maiores valores de uma determinada métrica.
-Exemplo:
+## a) Exibir os Top 5 produtos com maiores vendas:
 
 
 SELECT
-  {[Product].[Category].[Category].Members} ON COLUMNS,
+  TopCount([Product].[Product].[Product].Members, 5, [Measures].[Sales]) ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
-ORDER([Product].[Category].[Category].Members, [Measures].[Sales], BDESC)
-FETCH FIRST 5 ROWS ONLY
+Ordenação de Dados - Bottom:
 
-Neste exemplo, estamos selecionando as categorias de produtos e ordenando-as com base nas vendas em ordem descendente (BDESC). Em seguida, usamos a cláusula FETCH FIRST 5 ROWS ONLY para mostrar apenas as 5 principais categorias em termos de vendas.
-
-Bottom:
-O Bottom é usado para exibir os piores resultados com base em uma medida específica. É útil quando você deseja mostrar os elementos com os menores valores de uma determinada métrica.
-Exemplo:
+## b) Exibir os Bottom 3 produtos com menores vendas:
 
 
 SELECT
-  {[Product].[Category].[Category].Members} ON COLUMNS,
-  {[Measures].[Profit]} ON ROWS
+  BottomCount([Product].[Product].[Product].Members, 3, [Measures].[Sales]) ON COLUMNS,
+  {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
-ORDER([Product].[Category].[Category].Members, [Measures].[Profit], BASC)
-FETCH FIRST 3 ROWS ONLY
-
-Neste exemplo, estamos selecionando as categorias de produtos e ordenando-as com base nos lucros em ordem ascendente (BASC). Usamos a cláusula FETCH FIRST 3 ROWS ONLY para mostrar apenas as 3 piores categorias em termos de lucro.
 
 ## Rank:
 A função Rank é usada para atribuir um ranking com base em uma medida específica. Ela classifica os membros da dimensão com base no valor da medida.
