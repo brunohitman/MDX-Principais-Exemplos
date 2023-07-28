@@ -252,4 +252,66 @@ FROM [CubeName]
 
 Neste exemplo, estamos exibindo as categorias de produtos e a contagem de produtos em cada categoria (contagem de membros) junto com as vendas. A medida [Measures].[Sales].COUNT é usada para contar os membros da dimensão [Product].[Category].
 
-Essas funções de ordenação de dados são muito úteis para realizar análises rápidas e identificar rapidamente os principais elementos com base em diferentes métricas.
+# Formatação de Dados Numéricos:
+## a) Exibir números com duas casas decimais:
+
+
+
+WITH
+  MEMBER [Measures].[VendasFormatadas] AS
+    Format([Measures].[Vendas], '0.00')
+SELECT
+  {[Dimensao1].[Elemento1], [Dimensao2].[Elemento2]} ON COLUMNS,
+  {[Measures].[VendasFormatadas]} ON ROWS
+FROM [CubeName]
+
+## b) Exibir números com separador de milhares:
+
+
+
+WITH
+  MEMBER [Measures].[VendasFormatadas] AS
+    Format([Measures].[Vendas], '#,##0.00')
+SELECT
+  {[Dimensao1].[Elemento1], [Dimensao2].[Elemento2]} ON COLUMNS,
+  {[Measures].[VendasFormatadas]} ON ROWS
+FROM [CubeName]
+Formatação de Dados Percentuais:
+
+## c) Exibir percentuais com duas casas decimais:
+
+
+
+WITH
+  MEMBER [Measures].[TaxaDeConversaoFormatada] AS
+    Format([Measures].[TaxaDeConversao], '0.00%')
+SELECT
+  {[Dimensao1].[Elemento1], [Dimensao2].[Elemento2]} ON COLUMNS,
+  {[Measures].[TaxaDeConversaoFormatada]} ON ROWS
+FROM [CubeName]
+
+# Formatação de Dados Textuais:
+
+## c) Exibir os nomes dos produtos em letras maiúsculas:
+
+
+
+WITH
+  MEMBER [DimensaoProduto].[Produto].[Produto].Properties('Caption') AS
+    UCase([DimensaoProduto].[Produto].CurrentMember.Member_Caption)
+SELECT
+  {[DimensaoProduto].[Produto].[Produto].Members} ON COLUMNS,
+  {[Measures].[Vendas]} ON ROWS
+FROM [CubeName]
+
+## d) Exibir o nome do cliente em letras minúsculas:
+
+
+
+WITH
+  MEMBER [DimensaoCliente].[Cliente].[Cliente].Properties('Caption') AS
+    LCase([DimensaoCliente].[Cliente].CurrentMember.Member_Caption)
+SELECT
+  {[DimensaoCliente].[Cliente].[Cliente].Members} ON COLUMNS,
+  {[Measures].[Vendas]} ON ROWS
+FROM [CubeName]
