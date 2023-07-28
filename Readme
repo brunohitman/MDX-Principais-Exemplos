@@ -1,0 +1,173 @@
+Seleção de Elementos:
+a) Exibição de Tuplas:
+Principal uso: Para exibir os valores de uma medida para combinações específicas de elementos de dimensões diferentes. É útil para criar tabelas e matrizes de dados.
+Exemplo:
+
+
+
+SELECT
+  {[Product].[Category].[Electronics], [Product].[Subcategory].[Phones]} ON COLUMNS,
+  {[Measures].[SalesAmount]} ON ROWS
+FROM [CubeName]
+b) Cláusula Members:
+Principal uso: Para exibir todos os membros de uma hierarquia. Útil para listar todos os elementos disponíveis em uma dimensão.
+Exemplo:
+
+
+
+SELECT
+  {[Customer].[City].Members} ON COLUMNS,
+  {[Measures].[Revenue]} ON ROWS
+FROM [CubeName]
+c) Navegando na Hierarquia:
+Principal uso: Para navegar pela hierarquia de uma dimensão e selecionar elementos específicos em diferentes níveis.
+Exemplo:
+
+
+
+SELECT
+  {[Date].[Year].[2022].[Q2].[April], [Date].[Year].[2023].[Q1].[January]} ON COLUMNS,
+  {[Measures].[Sales]} ON ROWS
+FROM [CubeName]
+d) Excluir Vazios da Exibição:
+Principal uso: Para filtrar os resultados e excluir linhas ou colunas onde a medida não possui valor (NULL).
+Exemplo:
+
+
+
+SELECT
+  {[Product].[Category].[Category].Members} ON COLUMNS,
+  {[Measures].[Sales]} ON ROWS
+FROM [CubeName]
+WHERE ([Measures].[Sales] <> NULL)
+Cálculos entre Elementos:
+a) Cálculo WITH:
+Principal uso: Para criar novas medidas com base em cálculos envolvendo medidas existentes ou membros.
+Exemplo:
+
+
+
+WITH
+  MEMBER [Measures].[ProfitMargin] AS [Measures].[Profit] / [Measures].[Revenue]
+SELECT
+  {[Product].[Category].[Electronics], [Product].[Subcategory].[Phones]} ON COLUMNS,
+  {[Measures].[ProfitMargin]} ON ROWS
+FROM [CubeName]
+b) Criar Novas Medidas:
+Principal uso: Para criar novas medidas calculadas que não estão presentes no cubo, mas podem ser derivadas de medidas existentes.
+Exemplo:
+
+
+
+CREATE MEMBER [Measures].[GrowthRate] AS
+  ([Measures].[SalesThisYear] - [Measures].[SalesLastYear]) / [Measures].[SalesLastYear], FORMAT_STRING = 'Percent'
+SELECT
+  {[Product].[Category].[Category].Members} ON COLUMNS,
+  {[Measures].[GrowthRate]} ON ROWS
+FROM [CubeName]
+c) Named Set:
+Principal uso: Para criar conjuntos de membros que podem ser reutilizados em várias consultas.
+Exemplo:
+
+
+
+CREATE SET [Top5Customers] AS
+  TopCount([Customer].[Customer].[Customer].Members, 5, [Measures].[Sales])
+SELECT
+  {[Top5Customers]} ON COLUMNS,
+  {[Measures].[Sales]} ON ROWS
+FROM [CubeName]
+Ordem de Exibição de Elementos:
+a) Crossjoin:
+Principal uso: Para criar uma combinação de membros de diferentes hierarquias, criando uma tabela de todas as possíveis combinações.
+Exemplo:
+
+
+
+SELECT
+  Crossjoin([Product].[Category].[Category].Members, [Date].[Month].[Month].Members) ON COLUMNS,
+  {[Measures].[Sales]} ON ROWS
+FROM [CubeName]
+b) Hierarchize:
+Principal uso: Para organizar os membros em uma hierarquia específica.
+Exemplo:
+
+
+
+SELECT
+  Hierarchize({[Product].[Category].Members, [Product].[Subcategory].Members}) ON COLUMNS,
+  {[Measures].[Sales]} ON ROWS
+FROM [CubeName]
+c) Order:
+Principal uso: Para ordenar os membros de uma hierarquia com base em uma medida específica.
+Exemplo:
+
+
+
+SELECT
+  {[Product].[Category].[Category].Members} ON COLUMNS,
+  {[Measures].[Sales]} ON ROWS
+FROM [CubeName]
+ORDER([Product].[Category].[Category].Members, [Measures].[Sales], BDESC)
+d) Filter:
+Principal uso: Para filtrar membros com base em uma condição específica.
+Exemplo:
+
+
+
+SELECT
+  {[Product].[Category].[Category].Members} ON COLUMNS,
+  {[Measures].[Sales]} ON ROWS
+FROM [CubeName]
+WHERE [Measures].[Sales] > 1000
+Períodos de Tempo:
+a) Períodos Subsequentes:
+Principal uso: Para exibir valores para períodos de tempo consecutivos.
+Exemplo:
+
+
+
+SELECT
+  {[Date].[Month].[Month].&[2023]&[1], [Date].[Month].[Month].&[2023]&[2], [Date].[Month].[Month].&[2023]&[3]} ON COLUMNS,
+  {[Measures].[Revenue]} ON ROWS
+FROM [CubeName]
+b) Navegar entre Períodos:
+Principal uso: Para exibir valores para períodos de tempo anteriores ou posteriores.
+Exemplo:
+
+
+
+SELECT
+  {[Date].[Month].[Month].&[2023]&[7].PrevMember, [Date].[Month].[Month].&[2023]&[7]} ON COLUMNS,
+  {[Measures].[Sales]} ON ROWS
+FROM [CubeName]
+c) Períodos Paralelos:
+Principal uso: Para exibir valores para períodos de tempo correspondentes em anos diferentes.
+Exemplo:
+
+
+
+SELECT
+  {[Date].[Month].[Month].&[2022], [Date].[Month].[Month].&[2023]} ON COLUMNS,
+  {[Measures].[Profit]} ON ROWS
+FROM [CubeName]
+d) Períodos até a Data:
+Principal uso: Para exibir valores acumulados até uma determinada data.
+Exemplo:
+
+
+
+SELECT
+  PeriodsToDate([Date].[Month].[Year].&[2023], [Date].[Month].[Month].&[2023]&[7]) ON COLUMNS,
+  {[Measures].[Sales]} ON ROWS
+FROM [CubeName]
+e) Deslocamento na Dimensão:
+Principal uso: Para exibir valores deslocados na dimensão do tempo.
+Exemplo:
+
+
+
+SELECT
+  {[Date].[Month].[Month].&[2023]&[7].Lag(1)} ON COLUMNS,
+  {[Measures].[Sales]} ON ROWS
+FROM [CubeName]
