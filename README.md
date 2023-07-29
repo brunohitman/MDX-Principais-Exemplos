@@ -314,3 +314,68 @@ SELECT
   {[DimensaoCliente].[Cliente].[Cliente].Members} ON COLUMNS,
   {[Measures].[Vendas]} ON ROWS
 FROM [CubeName]
+
+
+# EXTRA - UMA ANÁLISE DE PARETO
+
+A análise de Pareto, também conhecida como "Princípio 80/20" ou "Regra 80/20", é um conceito que sugere que aproximadamente 80% dos efeitos vêm de 20% das causas. Essa ideia foi popularizada pelo economista italiano Vilfredo Pareto, que observou que a maioria da riqueza estava concentrada em uma minoria da população. O princípio de Pareto é amplamente aplicado em diversas áreas, incluindo negócios, economia, gerenciamento de projetos e análise de dados.
+
+No código MDX fornecido, a análise classifica as marcas de produtos com base na margem de lucro e, em seguida, mostra as principais marcas que geram a maior parte do lucro. Através da medida de "Margem de Lucro Acumulada", é possível identificar quais marcas contribuem significativamente para o lucro total, e a medida "% Lucro Acumulado" mostra a proporção do lucro acumulado em relação ao total.
+
+Essa é uma aplicação da análise de Pareto, pois a análise foca nas principais marcas (os 20%) que representam a maior parte do lucro (os 80%). Essa abordagem ajuda os gestores a identificar as áreas mais impactantes nos resultados financeiros e concentrar seus esforços nas marcas de maior relevância para otimizar o desempenho global do negócio.
+
+WITH
+  SET [MARCAS] AS
+    ORDER([Produto].[Hierarquia de Produtos].[Nível Marca], [Measures].[Margem], BDESC)
+MEMBER [Measures].[Margem por Marca] AS
+    '[Measures].[Margem]', FORMAT_STRING = "##,###.00"
+MEMBER [Measures].[Posição no Rank] AS
+    'RANK([Produto].[Hierarquia de Produtos].CurrentMember, [MARCAS])', FORMAT_STRING = "#;#;-"
+MEMBER [Measures].[% Lucro] AS
+    '[Measures].[Margem]/([Measures].[Margem], [Produto].[Hierarquia de Produtos].[All])', FORMAT_STRING = "#,###.00 %"
+MEMBER [Measures].[Margem Acumulada] AS
+    'SUM(HEAD([MARCAS],[Measures].[Posição no Rank]),[Measures].[Margem])', FORMAT_STRING = "#,###.00"
+MEMBER [Measures].[Total de Produtos] AS
+    '[MARCAS].Count', FORMAT_STRING = "#;#;-"
+MEMBER [Measures].[% Número Produtos] AS
+    '[Measures].[Posição no Rank] / [Measures].[Total de Produtos]', FORMAT_STRING = "#,###.00 %"
+MEMBER [Measures].[% Lucro Acumuladas] AS
+    'SUM(HEAD([MARCAS],[Measures].[Posição no Rank]),[Measures].[% Lucro] )', FORMAT_STRING = "#,###.00 %"
+SELECT ({ [MARCAS] }) ON ROWS,
+       ({ [Measures].[Margem por Marca]
+        , [Measures].[% Lucro Acumuladas]
+        , [Measures].[% Número Produtos]
+        }) ON COLUMNS
+FROM [COMPLETO]
+WHERE ([Tempo].[Ano].&[2014])
+
+O código MDX fornecido é usado para realizar uma análise de margem de lucro, classificar os produtos por marca com base na margem de lucro, calcular algumas medidas relacionadas e, em seguida, filtrar os resultados para o ano de 2014.
+
+Vamos analisar as partes do código e sua utilidade para o usuário:
+
+SET [MARCAS]:
+Esta parte do código cria um conjunto chamado [MARCAS] que contém as marcas de produtos (nível "Marca") ordenadas em ordem descendente com base na medida [Margem]. Isso significa que as marcas serão classificadas da maior margem de lucro para a menor.
+
+MEMBER [Measures].[Margem por Marca]:
+Esta é uma medida que calcula a margem de lucro para cada marca de produto. A medida é formatada para exibir duas casas decimais.
+
+MEMBER [Measures].[Posição no Rank]:
+Esta medida utiliza a função RANK para atribuir uma posição de ranking para cada marca de produto com base na medida [Margem]. O formato da medida é definido para mostrar o número positivo caso o produto esteja no ranking e negativo caso não esteja no conjunto classificado.
+
+MEMBER [Measures].[% Lucro]:
+Esta medida calcula o percentual de lucro para cada marca em relação ao total de lucro de todos os produtos. O formato da medida é definido para mostrar o resultado em formato de porcentagem com duas casas decimais.
+
+MEMBER [Measures].[Margem Acumulada]:
+Essa medida calcula a margem de lucro acumulada para cada marca. Utiliza a função SUM para somar as margens de lucro das marcas no conjunto classificado até a posição atual do produto na classificação. O formato da medida é definido para mostrar duas casas decimais.
+
+MEMBER [Measures].[Total de Produtos]:
+Essa medida simplesmente conta a quantidade de marcas de produtos no conjunto [MARCAS]. O formato da medida é definido para mostrar o número positivo.
+
+MEMBER [Measures].[% Número Produtos]:
+Essa medida calcula o percentual da posição do produto no ranking em relação ao total de produtos no conjunto [MARCAS]. O formato da medida é definido para mostrar o resultado em formato de porcentagem com duas casas decimais.
+
+MEMBER [Measures].[% Lucro Acumuladas]:
+Essa medida calcula o percentual de lucro acumulado para cada marca. Utiliza a função SUM para somar os percentuais de lucro das marcas no conjunto classificado até a posição atual do produto na classificação. O formato da medida é definido para mostrar o resultado em formato de porcentagem com duas casas decimais.
+
+O comando SELECT é usado para visualizar os resultados. Ele apresentará os valores de margem por marca, o percentual de lucro acumulado, e o percentual da posição no ranking para cada marca, filtrando os resultados apenas para o ano de 2014.
+
