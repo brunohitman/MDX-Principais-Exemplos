@@ -203,7 +203,7 @@ SELECT
   TopCount([Product].[Product].[Product].Members, 5, [Measures].[Sales]) ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
-Ordenação de Dados - Bottom:
+
 
 ## b) Exibir os Bottom 3 produtos com menores vendas:
 
@@ -233,13 +233,23 @@ Neste exemplo, criamos uma nova medida chamada [RankSales], que atribui um ranki
 A função Count é usada para contar o número de elementos em um conjunto. É útil para exibir a contagem de membros em uma dimensão ou hierarquia.
 Exemplo:
 
-
 SELECT
   {[Product].[Category].[Category].Members} ON COLUMNS,
   {[Measures].[Sales], [Measures].[Sales].COUNT} ON ROWS
 FROM [CubeName]
 
 Neste exemplo, estamos exibindo as categorias de produtos e a contagem de produtos em cada categoria (contagem de membros) junto com as vendas. A medida [Measures].[Sales].COUNT é usada para contar os membros da dimensão [Product].[Category].
+
+## Head:
+Exibir os primeiros 3 produtos com maiores vendas:
+
+SELECT
+  Head(Order([Product].[Product].[Product].Members, [Measures].[Sales], BDESC), 3) ON COLUMNS,
+  {[Measures].[Sales]} ON ROWS
+FROM [CubeName]
+Neste exemplo, a função Order é utilizada para ordenar os produtos em ordem descendente com base nas vendas. Em seguida, a função Head é aplicada para retornar os três primeiros produtos com maiores vendas.
+
+Essa combinação de Order e Head é útil quando você deseja visualizar os primeiros elementos em um conjunto ordenado, como os principais produtos por vendas ou os principais clientes por lucro.
 
 # Formatação de Dados Numéricos:
 ## a) Exibir números com duas casas decimais:
