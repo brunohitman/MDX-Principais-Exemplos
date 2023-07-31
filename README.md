@@ -7,48 +7,46 @@ Repositório com principais exemplos para MDX
 ## a) Exibição de Tuplas:
 Para exibir os valores de uma medida para combinações específicas de elementos de dimensões diferentes. É útil para criar tabelas e matrizes de dados.
 Exemplo:
-
-
-
+```ruby
 SELECT
-  {[Product].[Category].[Electronics], [Product].[Subcategory].[Phones]} ON COLUMNS,
-  {[Measures].[SalesAmount]} ON ROWS
+    {[Product].[Category].[Electronics], [Product].[Subcategory].[Phones]} ON COLUMNS,
+    {[Measures].[SalesAmount]} ON ROWS
 FROM [CubeName]
-
+```
 ## b) Cláusula Members:
 Para exibir todos os membros de uma hierarquia. Útil para listar todos os elementos disponíveis em uma dimensão.
 Exemplo:
 
 
-
+```ruby
 SELECT
   {[Customer].[City].Members} ON COLUMNS,
   {[Measures].[Revenue]} ON ROWS
 FROM [CubeName]
-
+```
 ## c) Navegando na Hierarquia:
 Para navegar pela hierarquia de uma dimensão e selecionar elementos específicos em diferentes níveis.
 Exemplo:
 
 
-
+```ruby
 SELECT
   {[Date].[Year].[2022].[Q2].[April], [Date].[Year].[2023].[Q1].[January]} ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
-
+```
 ## d) Excluir Vazios da Exibição:
 Para filtrar os resultados e excluir linhas ou colunas onde a medida não possui valor (NULL).
 Exemplo:
 
 
-
+```ruby
 SELECT
   {[Product].[Category].[Category].Members} ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
 WHERE ([Measures].[Sales] <> NULL)
-
+```
 # Cálculos entre Elementos:
 
 ## a) Cálculo WITH:
@@ -56,87 +54,87 @@ Para criar novas medidas com base em cálculos envolvendo medidas existentes ou 
 Exemplo:
 
 
-
+```ruby
 WITH
   MEMBER [Measures].[ProfitMargin] AS [Measures].[Profit] / [Measures].[Revenue]
 SELECT
   {[Product].[Category].[Electronics], [Product].[Subcategory].[Phones]} ON COLUMNS,
   {[Measures].[ProfitMargin]} ON ROWS
 FROM [CubeName]
-
+```
 ## b) Criar Novas Medidas:
 Para criar novas medidas calculadas que não estão presentes no cubo, mas podem ser derivadas de medidas existentes.
 Exemplo:
 
 
-
+```ruby
 CREATE MEMBER [Measures].[GrowthRate] AS
   ([Measures].[SalesThisYear] - [Measures].[SalesLastYear]) / [Measures].[SalesLastYear], FORMAT_STRING = 'Percent'
 SELECT
   {[Product].[Category].[Category].Members} ON COLUMNS,
   {[Measures].[GrowthRate]} ON ROWS
 FROM [CubeName]
-
+```
 ## c) Named Set:
 Para criar conjuntos de membros que podem ser reutilizados em várias consultas.
 Exemplo:
 
 
-
+```ruby
 CREATE SET [Top5Customers] AS
   TopCount([Customer].[Customer].[Customer].Members, 5, [Measures].[Sales])
 SELECT
   {[Top5Customers]} ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
-
+```
 # Ordem de Exibição de Elementos:
 ## a) Crossjoin:
 Para criar uma combinação de membros de diferentes hierarquias, criando uma tabela de todas as possíveis combinações.
 Exemplo:
 
 
-
+```ruby
 SELECT
   Crossjoin([Product].[Category].[Category].Members, [Date].[Month].[Month].Members) ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
-
+```
 ## b) Hierarchize:
 Para organizar os membros em uma hierarquia específica.
 Exemplo:
 
 
-
+```ruby
 SELECT
   Hierarchize({[Product].[Category].Members, [Product].[Subcategory].Members}) ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
-
+```
 ## c) Order:
 Para ordenar os membros de uma hierarquia com base em uma medida específica.
 Exemplo:
 
 
-
+```ruby
 SELECT
   {[Product].[Category].[Category].Members} ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
 ORDER([Product].[Category].[Category].Members, [Measures].[Sales], BDESC)
-
+```
 ## d) Filter:
 Para filtrar membros com base em uma condição específica.
 Exemplo:
 
 
-
+```ruby
 SELECT
   {[Product].[Category].[Category].Members} ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
 WHERE [Measures].[Sales] > 1000
-
+```
 # Períodos de Tempo:
 
 ## a) Períodos Subsequentes:
@@ -144,80 +142,80 @@ Para exibir valores para períodos de tempo consecutivos.
 Exemplo:
 
 
-
+```ruby
 SELECT
   {[Date].[Month].[Month].&[2023]&[1], [Date].[Month].[Month].&[2023]&[2], [Date].[Month].[Month].&[2023]&[3]} ON COLUMNS,
   {[Measures].[Revenue]} ON ROWS
 FROM [CubeName]
-
+```
 ## b) Navegar entre Períodos:
 Para exibir valores para períodos de tempo anteriores ou posteriores.
 Exemplo:
 
 
-
+```ruby
 SELECT
   {[Date].[Month].[Month].&[2023]&[7].PrevMember, [Date].[Month].[Month].&[2023]&[7]} ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
-
+```
 ## c) Períodos Paralelos:
 Para exibir valores para períodos de tempo correspondentes em anos diferentes.
 Exemplo:
 
 
-
+```ruby
 SELECT
   {[Date].[Month].[Month].&[2022], [Date].[Month].[Month].&[2023]} ON COLUMNS,
   {[Measures].[Profit]} ON ROWS
 FROM [CubeName]
-
+```
 ## d) Períodos até a Data:
 Para exibir valores acumulados até uma determinada data.
 Exemplo:
 
 
-
+```ruby
 SELECT
   PeriodsToDate([Date].[Month].[Year].&[2023], [Date].[Month].[Month].&[2023]&[7]) ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
-
+```
 ## e) Deslocamento na Dimensão:
 Para exibir valores deslocados na dimensão do tempo.
 Exemplo:
 
 
-
+```ruby
 SELECT
   {[Date].[Month].[Month].&[2023]&[7].Lag(1)} ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
-
+```
 # Ordenação de Dados:
 
 ## a) Exibir os Top 5 produtos com maiores vendas:
 
-
+```ruby
 SELECT
   TopCount([Product].[Product].[Product].Members, 5, [Measures].[Sales]) ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
-
+```
 
 ## b) Exibir os Bottom 3 produtos com menores vendas:
 
-
+```ruby
 SELECT
   BottomCount([Product].[Product].[Product].Members, 3, [Measures].[Sales]) ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
-
+```
 ## Rank:
 A função Rank é usada para atribuir um ranking com base em uma medida específica. Ela classifica os membros da dimensão com base no valor da medida.
 Exemplo:
 
-
+```ruby
 WITH
   MEMBER [Measures].[RankSales] AS
     Rank([Product].[Product].CurrentMember, [Measures].[Sales])
@@ -226,27 +224,29 @@ SELECT
   {[Measures].[Sales], [Measures].[RankSales]} ON ROWS
 FROM [CubeName]
 ORDER([Measures].[RankSales], BASC)
-
+```
 Neste exemplo, criamos uma nova medida chamada [RankSales], que atribui um ranking para cada produto com base nas vendas. Em seguida, ordenamos o resultado com base no ranking em ordem ascendente (BASC).
 
 ## Count:
 A função Count é usada para contar o número de elementos em um conjunto. É útil para exibir a contagem de membros em uma dimensão ou hierarquia.
 Exemplo:
-
+```ruby
 SELECT
   {[Product].[Category].[Category].Members} ON COLUMNS,
   {[Measures].[Sales], [Measures].[Sales].COUNT} ON ROWS
 FROM [CubeName]
-
+```
 Neste exemplo, estamos exibindo as categorias de produtos e a contagem de produtos em cada categoria (contagem de membros) junto com as vendas. A medida [Measures].[Sales].COUNT é usada para contar os membros da dimensão [Product].[Category].
 
 ## Head:
 Exibir os primeiros 3 produtos com maiores vendas:
-
+```ruby
 SELECT
   Head(Order([Product].[Product].[Product].Members, [Measures].[Sales], BDESC), 3) ON COLUMNS,
   {[Measures].[Sales]} ON ROWS
 FROM [CubeName]
+```
+
 Neste exemplo, a função Order é utilizada para ordenar os produtos em ordem descendente com base nas vendas. Em seguida, a função Head é aplicada para retornar os três primeiros produtos com maiores vendas.
 
 Essa combinação de Order e Head é útil quando você deseja visualizar os primeiros elementos em um conjunto ordenado, como os principais produtos por vendas ou os principais clientes por lucro.
@@ -255,7 +255,7 @@ Essa combinação de Order e Head é útil quando você deseja visualizar os pri
 ## a) Exibir números com duas casas decimais:
 
 
-
+```ruby
 WITH
   MEMBER [Measures].[VendasFormatadas] AS
     Format([Measures].[Vendas], '0.00')
@@ -263,11 +263,11 @@ SELECT
   {[Dimensao1].[Elemento1], [Dimensao2].[Elemento2]} ON COLUMNS,
   {[Measures].[VendasFormatadas]} ON ROWS
 FROM [CubeName]
-
+```
 ## b) Exibir números com separador de milhares:
 
 
-
+```ruby
 WITH
   MEMBER [Measures].[VendasFormatadas] AS
     Format([Measures].[Vendas], '#,##0.00')
@@ -276,11 +276,11 @@ SELECT
   {[Measures].[VendasFormatadas]} ON ROWS
 FROM [CubeName]
 Formatação de Dados Percentuais:
-
+```
 ## c) Exibir percentuais com duas casas decimais:
 
 
-
+```ruby
 WITH
   MEMBER [Measures].[TaxaDeConversaoFormatada] AS
     Format([Measures].[TaxaDeConversao], '0.00%')
@@ -288,13 +288,13 @@ SELECT
   {[Dimensao1].[Elemento1], [Dimensao2].[Elemento2]} ON COLUMNS,
   {[Measures].[TaxaDeConversaoFormatada]} ON ROWS
 FROM [CubeName]
-
+```
 # Formatação de Dados Textuais:
 
 ## c) Exibir os nomes dos produtos em letras maiúsculas:
 
 
-
+```ruby
 WITH
   MEMBER [DimensaoProduto].[Produto].[Produto].Properties('Caption') AS
     UCase([DimensaoProduto].[Produto].CurrentMember.Member_Caption)
@@ -302,11 +302,11 @@ SELECT
   {[DimensaoProduto].[Produto].[Produto].Members} ON COLUMNS,
   {[Measures].[Vendas]} ON ROWS
 FROM [CubeName]
-
+```
 ## d) Exibir o nome do cliente em letras minúsculas:
 
 
-
+```ruby
 WITH
   MEMBER [DimensaoCliente].[Cliente].[Cliente].Properties('Caption') AS
     LCase([DimensaoCliente].[Cliente].CurrentMember.Member_Caption)
@@ -314,7 +314,7 @@ SELECT
   {[DimensaoCliente].[Cliente].[Cliente].Members} ON COLUMNS,
   {[Measures].[Vendas]} ON ROWS
 FROM [CubeName]
-
+```
 
 # EXTRA - UMA ANÁLISE DE PARETO
 
@@ -323,7 +323,7 @@ A análise de Pareto, também conhecida como "Princípio 80/20" ou "Regra 80/20"
 No código MDX fornecido, a análise classifica as marcas de produtos com base na margem de lucro e, em seguida, mostra as principais marcas que geram a maior parte do lucro. Através da medida de "Margem de Lucro Acumulada", é possível identificar quais marcas contribuem significativamente para o lucro total, e a medida "% Lucro Acumulado" mostra a proporção do lucro acumulado em relação ao total.
 
 Essa é uma aplicação da análise de Pareto, pois a análise foca nas principais marcas (os 20%) que representam a maior parte do lucro (os 80%). Essa abordagem ajuda os gestores a identificar as áreas mais impactantes nos resultados financeiros e concentrar seus esforços nas marcas de maior relevância para otimizar o desempenho global do negócio.
-
+```ruby
 WITH
   SET [MARCAS] AS
     ORDER([Produto].[Hierarquia de Produtos].[Nível Marca], [Measures].[Margem], BDESC)
@@ -348,7 +348,7 @@ SELECT ({ [MARCAS] }) ON ROWS,
         }) ON COLUMNS
 FROM [COMPLETO]
 WHERE ([Tempo].[Ano].&[2014])
-
+```
 O código MDX fornecido é usado para realizar uma análise de margem de lucro, classificar os produtos por marca com base na margem de lucro, calcular algumas medidas relacionadas e, em seguida, filtrar os resultados para o ano de 2014.
 
 Vamos analisar as partes do código e sua utilidade para o usuário:
